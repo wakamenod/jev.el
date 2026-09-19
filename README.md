@@ -151,7 +151,7 @@ jev-error
 
 `jev-error-message`, `jev-error-status`, `jev-error-request-id` and
 `jev-error-body` read the error object. An error raised by your own callback
-is reported by Emacs as a timer error and does not affect the request.
+is reported with `message` and does not affect the request.
 
 ## Cost
 

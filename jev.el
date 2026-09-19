@@ -189,12 +189,16 @@ by now."
 
 Every callback of `jev-ask' goes through here, so that none of
 them ever runs before `jev-ask' has returned -- whatever the
-transport did -- and none of them runs inside a process filter,
-where an error of the caller's own would be printed and dropped
-without a backtrace, and in a batch session would end it."
+transport did -- and none of them runs inside a process filter.
+An error THUNK raises is the caller's own: it is reported here,
+the same way on every Emacs, and enters the debugger when
+`debug-on-error' asks for one."
   (run-at-time 0 nil (lambda ()
                        (unless (jev-cancelled-p request)
-                         (funcall thunk)))))
+                         (condition-case-unless-debug err
+                             (funcall thunk)
+                           (error (message "jev: callback signalled: %s"
+                                           (error-message-string err))))))))
 
 (defun jev--read-result (result questions provider model)
   "Return (REPLY . ERR) for the HTTP RESULT, one of them nil.
@@ -340,8 +344,8 @@ to be built somewhere the caller is prepared for it.
 Neither callback ever runs before this function has returned,
 whatever the transport did, so a caller may keep the request
 this returns and read it from inside either.  An error raised by
-SUCCESS or ERRBACK themselves is the caller's own; it is raised
-from a timer, which reports it and carries on.  A
+SUCCESS or ERRBACK themselves is the caller's own: it is reported
+with `message', and the request is unaffected.  A
 \\[keyboard-quit] pressed while the request is being sent is the
 caller's too: it is not reported again through ERRBACK, and the
 request is abandoned as `jev-cancel' abandons one.

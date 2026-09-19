@@ -772,11 +772,14 @@ start hook, leaving the caller waiting for an answer forever."
 (ert-deftest jev-test-an-error-in-success-is-not-a-send-failure ()
   "A callback that throws is the caller's own error, not a failed request.
 
-It runs from a timer, so the error is reported there and the
-request is still counted as the answered one it was."
+The error is reported and the request is still counted as the
+answered one it was."
   (let ((jev-api-key "k")
         (jev-session-usage nil)
         (inhibit-message t)
+        ;; ERT turns this on, which is a request for the debugger
+        ;; rather than a report; the test wants the report.
+        (debug-on-error nil)
         (ran nil)
         seen)
     ;; A stub answers inside the call that sends.  That must not put
